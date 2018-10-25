@@ -1,0 +1,70 @@
+version: '2'
+
+services:
+  elastic-search:
+    build: elasticsearch/
+    ports:
+      - "9200"
+      - "9300"
+    environment:
+      - "ES_JAVA_OPTS: -Xms1g -Xmx1g"
+      - discovery.zen.minimum_master_nodes=1
+      - network.host=0.0.0.0
+      - xpack.security.enabled=false
+      - xpack.ml.enabled=false
+      - xpack.graph.enabled=false
+      - xpack.watcher.enabled=false
+    networks:
+      docker_elk:
+        aliases:
+          - elasticsearch
+    volumes:
+      - /usr/share/elasticsearch/data
+  logstash:
+    image: docker.elastic.co/logstash/logstash:6.3.0
+    command: -f /etc/logstash/conf.d/logstash.conf
+    volumes:
+      - ./logstash/config/logstash.conf:/etc/logstash/conf.d/logstash.conf
+      #- ./logstash/GeoLite2-City.mmdb:/etc/logstash/GeoLite2-City.mmdb
+      - ./logstash/templates:/etc/logstash/templates
+      - ./logstash/logstash.yml:/etc/logstash/logstash.yml
+    ports:
+      - "5000:5000"
+      - "5044:5044"
+      - "12201:12201/udp"
+    networks:
+      - docker_elk
+    depends_on:
+      - elastic-search
+    links:
+      - elastic-search
+  kibana:
+    build: kibana/
+    container_name: kibana
+    volumes:
+      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - "5602:5602"
+    networks:
+      - docker_elk
+    depends_on:
+      - elastic-search
+  nginx:
+    image: nginx
+    ports:
+      - "5601:5601"
+    links:
+      - kibana
+      - elastic-search
+    volumes:
+      - /etc/nginx/certs
+      - /var/www/letsencrypt:/var/www/letsencrypt
+      #- /etc/letsencrypt/live/logs.qbo.tech:/etc/nginx/certs
+      - "$PWD/nginx/kibana.htpasswd:/etc/nginx/conf.d/kibana.htpasswd"
+      - "$PWD/nginx/default.conf:/etc/nginx/conf.d/default.conf"
+    networks:
+      - docker_elk
+
+networks:
+  docker_elk:
+    driver: bridge

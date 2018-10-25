@@ -1,0 +1,35 @@
+{
+  "template": "container-log*",
+  "version": 50001,
+  "settings": {
+    "index.refresh_interval": "5s"
+  },
+  "mappings": {
+    "_default_": {
+      "properties": {
+        "geoip": {
+          "type": "object",
+          "dynamic": true,
+          "properties": {
+            "ip": {
+              "type": "ip",
+              "doc_values": true
+            },
+            "location": {
+              "type": "geo_point",
+              "doc_values": true
+            },
+            "latitude": {
+              "type": "float",
+              "doc_values": true
+            },
+            "longitude": {
+              "type": "float",
+              "doc_values": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

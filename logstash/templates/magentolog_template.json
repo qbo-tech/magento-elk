@@ -1,0 +1,21 @@
+{
+  "template" : "magentolog-*",
+  "mappings" : {
+    "log" : {
+      "properties" : {
+        "message" : {
+          "type" : "text",
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 756
+             }
+           }
+         },
+        "user_process_crashed" : {
+          "type" : "integer"
+         }
+       }
+     }
+   }
+}

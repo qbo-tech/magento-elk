@@ -1,0 +1,16 @@
+services:
+    filebeat:
+      image: registry.qbo.tech:5000/filebeat:latest
+      restart: always
+      depends_on: 
+        - app
+      volumes:
+        #- ./filebeat.yml:/filebeat.yml
+        - /var/run/docker.sock:/tmp/docker.sock
+      volumes_from:
+        - appdata
+      environment:
+        - APP_ID=magento2
+        - LOGSTASH_HOST=LOGSTASH_IP
+        - LOGSTASH_PORT=5044
+        - SHIPPER_NAME=local-shipper
